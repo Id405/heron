@@ -237,8 +237,9 @@ impl ColliderFactory for CollisionShape {
             } => cuboid_builder(*half_extends, *border_radius),
             CollisionShape::ConvexHull {
                 points,
+                indices,
                 border_radius,
-            } => convex_hull_builder(points.as_slice(), *border_radius),
+            } => convex_hull_builder(points.as_slice(), indices.as_slice(), *border_radius),
             CollisionShape::HeightField { size, heights } => heightfield_builder(*size, heights),
             #[cfg(dim3)]
             CollisionShape::Cone {
@@ -298,13 +299,18 @@ fn cuboid_builder(half_extends: Vec3, border_radius: Option<f32>) -> ColliderBui
 }
 
 #[inline]
-fn convex_hull_builder(points: &[Vec3], border_radius: Option<f32>) -> ColliderBuilder {
+fn convex_hull_builder(points: &[Vec3], indices: &[u32], border_radius: Option<f32>) -> ColliderBuilder {
     let points: Vec<Point<f32>> = points.into_rapier();
+    let mut indices_rapier: Vec<[u32; 3]> = Vec::new();
+
+    for i in 0..(indices.len()/3) {
+        indices_rapier.push([indices[i * 3], indices[i * 3 + 1], indices[i * 3 + 2]]);
+    }
+
     border_radius.map_or_else(
-        || ColliderBuilder::convex_decomposition(points.as_slice()).expect("Failed to create convex-hull"),
+        || ColliderBuilder::convex_decomposition(points.as_slice(), indices_rapier.as_slice()),
         |border_radius| {
-            ColliderBuilder::round_convex_decomposition(points.as_slice(), border_radius)
-                .expect("Failed to create convex-hull")
+            ColliderBuilder::round_convex_decomposition(points.as_slice(), indices_rapier.as_slice(), border_radius)
         },
     )
 }

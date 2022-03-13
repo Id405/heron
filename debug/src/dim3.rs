@@ -49,6 +49,7 @@ fn add_shape_outlines(
             } => add_capsule(origin, orient, *half_segment, *radius, color, &mut lines),
             CollisionShape::ConvexHull {
                 points,
+                indices,
                 border_radius: _,
             } => {
                 // NOTE: won't work with ConvexHull with border_radius set,

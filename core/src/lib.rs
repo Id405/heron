@@ -183,6 +183,8 @@ pub enum CollisionShape {
     ConvexHull {
         /// A vector of points describing the convex hull
         points: Vec<Vec3>,
+        /// A vector describing the indices of the hull for use with convex decomposition
+        indices: Vec<u32>,
         /// An optional border radius that will be used to round the corners of the convex hull
         ///
         /// This radius refers to how much to _add_ to the existing size of the hull, creating an

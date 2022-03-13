@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::mesh::VertexAttributeValues};
+use bevy::{prelude::*, render::mesh::{VertexAttributeValues, Indices}};
 
 use crate::{CollisionShape, RigidBody};
 
@@ -93,6 +93,10 @@ fn generate_collision(
                     "Mesh should have encoded vertices as VertexAttributeValues::Float32x3"
                 ),
             };
+            let indices = match mesh.indices().expect("Failed to get mesh indicies") { 
+                Indices::U16(indices) => indices.into_iter().map(|x| *x as u32).collect::<Vec<_>>(),
+                Indices::U32(indices) => indices.clone(),
+            };
             let mut points = Vec::with_capacity(vertices.len());
             for vertex in vertices {
                 points.push(Vec3::new(vertex[0], vertex[1], vertex[2]));
@@ -102,6 +106,7 @@ fn generate_collision(
                 .insert(pending_collision.body_type)
                 .insert(CollisionShape::ConvexHull {
                     points,
+                    indices,
                     border_radius: pending_collision.border_radius,
                 });
         }
@@ -194,11 +199,12 @@ mod tests {
                 "Assigned body type should be equal to specified"
             );
 
-            let (points, border_radius) = match collision_shape {
+            let (points, indices, border_radius) = match collision_shape {
                 CollisionShape::ConvexHull {
                     points,
+                    indices,
                     border_radius,
-                } => (points, border_radius),
+                } => (points, indices, border_radius),
                 _ => panic!("Assigned collision shape must be a convex hull"),
             };
 
