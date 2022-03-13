@@ -301,9 +301,9 @@ fn cuboid_builder(half_extends: Vec3, border_radius: Option<f32>) -> ColliderBui
 fn convex_hull_builder(points: &[Vec3], border_radius: Option<f32>) -> ColliderBuilder {
     let points: Vec<Point<f32>> = points.into_rapier();
     border_radius.map_or_else(
-        || ColliderBuilder::convex_hull(points.as_slice()).expect("Failed to create convex-hull"),
+        || ColliderBuilder::convex_decomposition(points.as_slice()).expect("Failed to create convex-hull"),
         |border_radius| {
-            ColliderBuilder::round_convex_hull(points.as_slice(), border_radius)
+            ColliderBuilder::round_convex_decomposition(points.as_slice(), border_radius)
                 .expect("Failed to create convex-hull")
         },
     )
